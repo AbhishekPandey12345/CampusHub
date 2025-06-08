@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect ,useContext} from 'react';
 import axios from 'axios';
 import PostManager from './PostManager';
 import { useNavigate } from 'react-router-dom';
 import { PencilIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
+import { LoginContext } from './Logincontext.jsx';
 
 const ProfilePage = () => {
+
+  const { islogin, setIslogin } = useContext(LoginContext);
   const [data, setData] = useState(null);
   const [isCurrentUser, setIsCurrentUser] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
@@ -55,6 +58,7 @@ const ProfilePage = () => {
   };
 
   const handleLogout = () => {
+    setIslogin(false);
     localStorage.removeItem("user");
     navigate('/login');
   };

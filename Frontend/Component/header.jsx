@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState , useContext} from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
-import photo from '/abhi_photo.jpeg'
+import photo from '/abhi_photo.png'
 import { useNotification } from './Notification';
 import { NavLink } from 'react-router-dom';
 import { LoginContext } from './Logincontext.jsx';

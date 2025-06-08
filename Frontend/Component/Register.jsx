@@ -180,7 +180,7 @@ const RegisterPage = () => {
                 onChange={(e) => setBatchYear(e.target.value)}
                 required
               >
-                <option value="">Select Batch Year</option>
+                <option value="">Select Passing Year</option>
                 {Array.from({length: 20}, (_, i) => new Date().getFullYear() - i).map(year => (
                   <option key={year} value={year}>{year}</option>
                 ))}

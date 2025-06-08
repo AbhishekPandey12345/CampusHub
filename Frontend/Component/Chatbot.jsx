@@ -37,13 +37,16 @@ const ChatBubble = () => {
     ]);
 
     async function get() {
+      console.log("hare Krishna")
       try {
         const randomResponse = await run(inputMessage);
+        console.log(randomResponse);
         setMessages((prevMessages) => [
           ...prevMessages,
           { text: randomResponse, isBot: true },
         ]);
       } catch (error) {
+        console.log(error);
         setMessages((prevMessages) => [
           ...prevMessages,
           { 
