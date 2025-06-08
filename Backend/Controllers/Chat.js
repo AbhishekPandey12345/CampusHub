@@ -112,7 +112,27 @@ const creategruop = asyncHandler(async (req, res) => {
 
 const acesschat = asyncHandler(async (req, res) => {
   const { _id } = req.body;
-  const { username } = req.query;
+  const { username, getid } = req.query;
+
+  // Case 1: Fetch by chat ID
+  if (getid) {
+    const chat = await Chat.findById(getid)
+      .populate("users", "username Avatar _id")
+      .populate({
+        path: "latestmessage",
+        populate: { path: "sender", select: "name Avatar _id username" },
+      });
+
+    if (!chat) {
+      return res.status(404).json(new ApiError(404, "Chat not found"));
+    }
+
+    return res.status(200).json(
+      new ApiResponse(200, chat, "Chat fetched")
+    );
+  }
+
+  // Case 2: Find or create chat with username
   if (!username) {
     return res.status(400).json(new ApiError(400, "Username is required"));
   }
@@ -122,45 +142,100 @@ const acesschat = asyncHandler(async (req, res) => {
     return res.status(404).json(new ApiError(404, "User not found"));
   }
 
-  // Explicit return after throwing error
   if (targetUser._id.equals(_id)) {
-    return res.status(400).json({message: "Cannot create chat with yourself"}
-    );
+    return res.status(400).json(new ApiError(400, "Cannot chat with yourself"));
   }
-  
+
   if (!targetUser.allowChat) {
-    console.log("jakj");
-    return res.status(400).json(
-      new ApiError(400, {
-        message: "User does not allow chatting",
-        code: "CHAT_DISABLED",
-      })
-    );
+    return res.status(400).json(new ApiError(400, {
+      message: "User does not allow chatting",
+      code: "CHAT_DISABLED",
+    }));
   }
-  try {
-    // Rest of your chat logic...
-    const existingChat = await Chat.findOne({
-      users: { $all: [targetUser._id, _id] },
-      isgroup: false,
-    }).populate(/* ... */);
 
-    if (existingChat) {
-      return res
-        .status(200)
-        .json(new ApiResponse(200, existingChat, "Chat fetched"));
-    }
+  let chat = await Chat.findOne({
+    isgroup: false,
+    users: { $all: [targetUser._id, _id] },
+  })
+    .populate("users", "username Avatar _id")
+    .populate({
+      path: "latestmessage",
+      populate: { path: "sender", select: "name Avatar _id username" },
+    });
 
-    const newChat = await Chat.create(/* ... */);
-    const populatedChat = await Chat.findById(newChat._id).populate(/* ... */);
-
-    return res
-      .status(200)
-      .json(new ApiResponse(200, populatedChat, "New chat created"));
-  } catch (error) {
-    console.error("Chat error:", error);
-    return res.status(500).json(new ApiError(500, "Chat processing failed"));
+  if (chat) {
+    return res.status(200).json(new ApiResponse(200, chat, "Chat already exists"));
   }
+
+  const newChat = await Chat.create({
+    chatname: "sender",
+    isgroup: false,
+    users: [targetUser._id, _id],
+  });
+
+  const fullChat = await Chat.findById(newChat._id)
+    .populate("users", "username Avatar _id")
+    .populate({
+      path: "latestmessage",
+      populate: { path: "sender", select: "name Avatar _id username" },
+    });
+
+  return res.status(200).json(new ApiResponse(200, fullChat, "New chat created"));
 });
+
+
+// const acesschat = asyncHandler(async (req, res) => {
+//   const { _id } = req.body;
+//   const { username } = req.query;
+//   if (!username) {
+//     return res.status(400).json(new ApiError(400, "Username is required"));
+//   }
+
+//   const targetUser = await User.findOne({ username }).select("allowChat _id");
+//   if (!targetUser) {
+//     return res.status(404).json(new ApiError(404, "User not found"));
+//   }
+
+//   // Explicit return after throwing error
+//   if (targetUser._id.equals(_id)) {
+//     return res.status(400).json({message: "Cannot create chat with yourself"}
+//     );
+//   }
+  
+//   if (!targetUser.allowChat) {
+//     console.log("jakj");
+//     return res.status(400).json(
+//       new ApiError(400, {
+//         message: "User does not allow chatting",
+//         code: "CHAT_DISABLED",
+//       })
+//     );
+//   }
+//   try {
+//     // Rest of your chat logic...
+//     const existingChat = await Chat.findOne({
+//       users: { $all: [targetUser._id, _id] },
+//       isgroup: false,
+//     }).populate(/* ... */);
+
+//     if (existingChat) {
+//       return res
+//         .status(200)
+//         .json(new ApiResponse(200, existingChat, "Chat fetched"));
+//     }
+
+//     const newChat = await Chat.create(/* ... */);
+//     const populatedChat = await Chat.findById(newChat._id).populate(/* ... */);
+
+//     return res
+//       .status(200)
+//       .json(new ApiResponse(200, populatedChat, "New chat created"));
+//   } catch (error) {
+//     console.error("Chat error:", error);
+//     return res.status(500).json(new ApiError(500, "Chat processing failed"));
+//   }
+// });
+
 
 const rename = asyncHandler(async (req, res) => {
   const { chatid, chatname } = req.body;

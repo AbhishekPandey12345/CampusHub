@@ -27,13 +27,15 @@ const ChatPage = () => {
   const{ notificationInc, notificationDec } = useNotification();
   const createMessage = async(_id)=>{
     const userValue = localStorage.getItem("user");
+    console.log(userValue, _id);
     if(newchat!=null){
     const user = JSON.parse(userValue);
     try{
      const get =  await axios.post(`${import.meta.env.VITE_backend_URL}/users/newmessage`,{
         chatid:_id ,
         content:newchat,
-      }, {
+      },
+      {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${user?.Token}`,
@@ -90,6 +92,7 @@ const ChatPage = () => {
             username: username
           },
         });
+        console.log(response);
         const res = await axios.get(`${import.meta.env.VITE_backend_URL}/users/getallmessage`, {
           headers: {
             'Content-Type': 'application/json',
@@ -99,13 +102,14 @@ const ChatPage = () => {
             chatid: _id,
           },
         });
-        setallmessage(res.data.data);
+        setallmessage(res?.data?.data);
         setnewchat(null);
-        setChats(response.data.data);
-        setSelectedchat(response.data.data._id);
-        socket.emit("join chat",response.data.data._id);
+        setChats(response?.data?.data);
+        console.log(response.data.data.isgroup);
+        console.log(response.data.data.user);
+        setSelectedchat(response?.data?.data?._id);
+        socket.emit("join chat",response?.data?.data?._id);
       } catch (err) {
-        console.log(err);
         toast.error(err);
       }
     }
@@ -129,9 +133,6 @@ const ChatPage = () => {
       setGetSearchUser(response.data.data);
       if (getsearchuser.length > 0) {
         setIsSidebarVisible(true);
-      }
-      else {
-        toast.error("No user Found");
       }
     } catch (error) {
       toast.error("An error occurred");
@@ -263,8 +264,8 @@ const ChatPage = () => {
                      { !chat.isgroup && <img src={chat.users[0].Avatar} className="w-12 h-12 rounded-full object-cover" alt="" /> }
                       { chat.isgroup && <img src={chat.Avatar} className="w-12 h-12 rounded-full object-cover" alt="" />}
                      {!chat.isgroup && <div>
-                        <div className="font-semibold">{chat.users[0].username}</div>
-                        <div className="text-sm text-gray-500">{chat.latestmessage.content}</div>
+                        <div className="font-semibold">{chat.users[0].username || 'hello'}</div>
+                        <div className="text-sm text-gray-500">{chat?.latestmessage?.content}</div>
                       </div>}
                       { chat.isgroup && 
                           <div>
@@ -289,7 +290,7 @@ const ChatPage = () => {
             { !chats.isgroup && <img src={chats.users[0].Avatar} className="w-36 h-36 rounded-full object-cover" alt="" /> }
             { chats.isgroup && <img src={chats.Avatar} className="w-36 h-36 rounded-full object-cover" alt="" /> }
               <div className="flex items-center space-x-3 mx-60">
-              {!chats.isgroup &&  <div className="font-semibold">{chats.users[0].FullName}</div>}
+              {!chats.isgroup &&  <div className="font-semibold">{chats.users[0].username}</div>}
               {chats.isgroup &&  <div className="font-semibold">{chats.chatname}</div>}
               </div>
             </div>

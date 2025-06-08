@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import ReactMarkdown from 'react-markdown';
 
 const SinglePost = () => {
   const navigation = useNavigate();
@@ -146,88 +146,106 @@ const SinglePost = () => {
     }
   }
 
-  return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 bg-blue-100">
-      <div className="space-y-6">
+   return (
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 bg-blue-100 dark:bg-gray-900">
+      <div className="space-y-10">
+
+        {/* Title */}
         <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-5xl lg:text-6xl">
           {data.title}
         </h1>
 
-        <div className="relative h-screen flex items-center justify-center">
+        {/* Media Display */}
+        <div className="relative w-full h-[60vh] rounded-xl overflow-hidden shadow-lg">
           {mediaType === 'image' ? (
             <img
-              alt="Blog post cover image"
-              className="max-w-full max-h-full object-cover"
+              alt="Post"
+              className="w-full h-full object-contain"
               src={data.Postimg}
-              style={{ minWidth: "128px" }}
             />
           ) : (
-            <video width="840" height="360" controls>
+            <video className="w-full h-full object-cover" controls>
               <source src={data.Postimg} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           )}
-          <div className="absolute top-4 right-4">
-            <button className="rounded-full p-2 bg-gray-700 hover:bg-gray-800 text-white" onClick={handledelete}>
-              <TrashIcon className="h-5 w-5" />
-              <span className="sr-only">Delete</span>
-            </button>
-          </div>
+          <button
+            className="absolute top-4 right-4 rounded-full p-2 bg-gray-700 hover:bg-gray-800 text-white"
+            onClick={handledelete}
+          >
+            <TrashIcon className="h-5 w-5" />
+          </button>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="h-16 w-16 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 font-medium">
+
+        {/* Author Info */}
+        <div className="flex items-center gap-4">
+          <div className="h-14 w-14 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-lg font-bold text-white">
             {data.Username ? data.Username.charAt(0).toUpperCase() : 'J'}
           </div>
-          <div className="text-lg">{data.Username ? data.Username : "Jhon"}</div>
-        </div>
-        <div className="prose prose-lg prose-gray dark:prose-invert max-w-none">
-          <p>{data.description}</p>
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div onClick={hitlikebutton} className="flex items-center space-x-1 text-gray-500 dark:text-gray-400">
-              <HeartIcon className="w-5 h-5 fill-current" />
-              <span>{nooflike}</span>
-            </div>
-            <div className="flex items-center space-x-1 text-gray-500 dark:text-gray-400">
-              <MessageCircleIcon className="w-5 h-5 fill-current" />
-              <span>{noofcomment}</span>
-            </div>
+          <div className="text-lg text-gray-800 dark:text-gray-200">
+            {data.Username || "Jhon"}
           </div>
         </div>
-        <div className="space-y-6">
-          <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Comments</h2>
-          {comment.map((com) => (
-            <div className="space-y-6" key={com._id}>
-              <div className="flex flex-row items-start space-x-4">
-                <div className="flex flex-row space-x-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{com.Username}</h3>
-                  </div>
-                  <p className="text-gray-700 dark:text-gray-300">{com.Content}</p>
-                  <button
-                    onClick={() => deletecomment(com._id)}
-                    aria-label="Delete comment"
-                    className=" h-6 w-6 items-center justify-center rounded-full transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
-                  >
-                    <XIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                  </button>
-                </div>
-              </div>
 
-            </div>
-          ))
-
-          }
+        {/* Markdown Description */}
+        <div className="prose prose-lg dark:prose-invert max-w-none">
+          <ReactMarkdown>{data.description}</ReactMarkdown>
         </div>
-        <div className="space-y-6">
-          <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Post a Comment</h2>
-          <form className="grid gap-4">
-            <div className="grid gap-2">
-              <label htmlFor="comment">Comment</label>
-              <textarea name="Comment" placeholder="Write your comment" onChange={handleInput} />
+
+        {/* Likes and Comments */}
+        <div className="flex items-center space-x-6 text-gray-600 dark:text-gray-400 mt-4">
+          <div onClick={hitlikebutton} className="flex items-center space-x-2 cursor-pointer">
+            <HeartIcon className="w-5 h-5" />
+            <span>{nooflike}</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <MessageCircleIcon className="w-5 h-5" />
+            <span>{noofcomment}</span>
+          </div>
+        </div>
+
+        {/* Comments Section */}
+        <div className="space-y-6 mt-10">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Comments</h2>
+          {comment.map((com) => (
+            <div key={com._id} className="flex justify-between items-start gap-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{com.Username}</h3>
+                <p className="text-gray-700 dark:text-gray-300 mt-1">{com.Content}</p>
+              </div>
+              <button
+                onClick={() => deletecomment(com._id)}
+                aria-label="Delete comment"
+                className="h-6 w-6 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center"
+              >
+                <XIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+              </button>
             </div>
-            <button onClick={addComment} className="bg-blue-700" type="submit">Post Comment</button>
+          ))}
+        </div>
+
+        {/* Add Comment */}
+        <div className="space-y-4 mt-10">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Post a Comment</h2>
+          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); addComment(); }}>
+            <div>
+              <label htmlFor="comment" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Comment
+              </label>
+              <textarea
+                name="Comment"
+                onChange={handleInput}
+                rows={4}
+                placeholder="Write your comment..."
+                className="w-full p-3 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100"
+              />
+            </div>
+            <button
+              type="submit"
+              className="bg-blue-700 text-white px-4 py-2 rounded-md hover:bg-blue-800"
+            >
+              Post Comment
+            </button>
           </form>
         </div>
       </div>
